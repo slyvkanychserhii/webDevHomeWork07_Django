@@ -12,20 +12,32 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 
+import environ
+from django.core.management.utils import get_random_secret_key
+import os
+
+
+env = environ.Env(
+    SECRET_KEY=(str, get_random_secret_key()),
+    DEBUG=(bool, False),
+    ALLOWED_HOSTS=(list, []),
+    MYSQL=(bool, False)
+)
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-1&y9eb0e%wdm!c66gx!$7(4wla_-==e$^rlr!^ksdabrvfy-!0'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env('ALLOWED_HOSTS')
 
 
 # Application definition
@@ -37,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'hello.apps.HelloConfig',
 ]
 
 MIDDLEWARE = [
@@ -74,10 +87,7 @@ WSGI_APPLICATION = 'hw7.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': env.db(['SQLITE_URL', 'MYSQL_URL'][env('MYSQL')])
 }
 
 
